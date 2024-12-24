@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import { Rnd } from 'react-rnd';
 import 'react-quill/dist/quill.snow.css';
 import html2pdf from 'html2pdf.js';
+import { after } from 'slate';
 const predefinedFields = [
   { id: 'field-1', name: 'First Name' },
   { id: 'field-2', name: 'Last Name' },
@@ -148,6 +149,32 @@ const PDFEditor = () => {
     'indent',
   ];
 
+  const handleKeyDown = (e) => {
+    const quill = quillRef.current.getEditor();
+    const selection = quill.getSelection();
+    if (!selection) return;
+
+    const cursorPosition = selection.index;
+    const text = quill.getText();
+
+    const beforeCursor = text[cursorPosition - 1]; // Character before cursor
+
+    if (e.key === 'Backspace' && beforeCursor === '>') {
+      console.log('I AM INSIDE');
+      const tagStartIndex = text.lastIndexOf('<', cursorPosition - 1);
+      const tagEndIndex = text.lastIndexOf('>', cursorPosition);
+
+      if (tagStartIndex !== -1) {
+        const tag = text.substring(tagStartIndex, tagEndIndex + 1);
+        const placeholderMatch = tag.match(/<\[[^\]]+\]>/);
+
+        if (placeholderMatch) {
+          quill.deleteText(tagStartIndex, tagEndIndex - tagStartIndex + 1);
+        }
+      }
+    }
+  };
+
   return (
     <div>
       <h1>WYSIWYG PDF Editor</h1>
@@ -239,6 +266,7 @@ const PDFEditor = () => {
               onChange={setEditorHtml}
               modules={quillModules}
               formats={quillFormats}
+              onKeyDown={handleKeyDown}
               placeholder='Type here and drag fields or images.'
             />
           ) : (
