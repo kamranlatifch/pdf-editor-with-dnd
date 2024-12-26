@@ -11,7 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-/* .ql-editor {
-  min-height: 500px;
-  position: relative;
-} */
+.ql-editor {
+  overflow-y: hidden;
+}
+.ql-container.ql-snow {
+  border: none !important;
+}
