@@ -65,7 +65,7 @@ const PDFEditor = () => {
     html2pdf().from(contentToPrint).set(options).save();
   };
 
-  const handleImageClick = (imageId) => {
+  const handleRemoveImage = (imageId) => {
     // Remove the image from the images array when the "X" is clicked
     setImages((prevImages) => prevImages.filter((img) => img.id !== imageId));
   };
@@ -96,6 +96,7 @@ const PDFEditor = () => {
         { indent: '+1' },
       ],
       ['clean'],
+      ['table'],
     ],
   };
 
@@ -339,7 +340,7 @@ const PDFEditor = () => {
             </div>
           )}
 
-          {isEditorMode &&
+          {/* {isEditorMode &&
             images.map((image) => (
               <Rnd
                 key={image.id}
@@ -410,6 +411,103 @@ const PDFEditor = () => {
                     </label>
                   </div>
                 )}
+              </Rnd>
+            ))} */}
+          {isEditorMode &&
+            images.map((image) => (
+              <Rnd
+                key={image.id}
+                bounds='parent'
+                size={{ width: image.width, height: image.height }}
+                position={{ x: image.x, y: image.y }}
+                onDragStop={(e, d) => {
+                  setImages((prevImages) =>
+                    prevImages.map((img) =>
+                      img.id === image.id ? { ...img, x: d.x, y: d.y } : img
+                    )
+                  );
+                }}
+                onResizeStop={(e, direction, ref, delta, position) => {
+                  setImages((prevImages) =>
+                    prevImages.map((img) =>
+                      img.id === image.id
+                        ? {
+                            ...img,
+                            width: ref.offsetWidth,
+                            height: ref.offsetHeight,
+                            x: position.x,
+                            y: position.y,
+                          }
+                        : img
+                    )
+                  );
+                }}
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                >
+                  <button
+                    onClick={() => handleRemoveImage(image.id)}
+                    style={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      background: 'none',
+                      border: 'none',
+                      color: '#ff0000',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    X
+                  </button>
+
+                  {image.uploadedImage ? (
+                    <img
+                      src={image.uploadedImage}
+                      alt='Uploaded'
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover', // Ensures the image fits within the box
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#f0f0f0',
+                        border: '1px dashed #ccc',
+                      }}
+                    >
+                      <label
+                        style={{
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          color: '#007bff',
+                        }}
+                      >
+                        Upload Image
+                        <input
+                          type='file'
+                          accept='image/*'
+                          style={{ display: 'none' }}
+                          onChange={(e) =>
+                            handleImageUpload(image.id, e.target.files[0])
+                          }
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
               </Rnd>
             ))}
         </div>
